@@ -37,28 +37,34 @@ try {
         usingDefault = true;
     } catch (e) {
         console.error(c("No config file found for %s", 'red'), env);
-        console.error(c("We couldn't find anything at: %s", 'grey'), configPath + env + '_config.json');
-        console.error(c("Or at: %s", 'grey'), configPath + 'config.json');
+        console.error(c("We couldn't find %s_config.json or config.json at: %s", 'grey'), env, configPath);
         throw e;
     }
 }
 
 try {
     config = JSON.parse(config);
-    if (usingDefault) config = config[env];
-    if (config.getconfig) {
-        if (config.getconfig.hasOwnProperty('colors')) useColor = config.getconfig.colors;
-        if (config.getconfig.hasOwnProperty('silent')) silent = config.getconfig.silent;        
-    } else {
-        config.getconfig = {};
-    }
-    config.getconfig.env = env;
-
 } catch (e) {
     console.error(c("Invalid JSON file", 'red'));
     console.error(c("Check it at:", 'grey') + c(" http://jsonlint.com", 'blue'));
     throw e;
 }
+
+if (usingDefault) {
+    if (!config.hasOwnProperty(env)) {
+        console.error(c("The config.json file does not have key: '%s'", 'red'), env);
+        throw new Error('Invalid configuration');
+    }
+    config = config[env];
+}
+if (config.getconfig) {
+    if (config.getconfig.hasOwnProperty('colors')) useColor = config.getconfig.colors;
+    if (config.getconfig.hasOwnProperty('silent')) silent = config.getconfig.silent;        
+} else {
+    config.getconfig = {};
+}
+config.getconfig.env = env;
+
 
 // log out what we've got
 if (!silent) console.log(c(c(env, color), 'bold') + c(' environment detected', 'grey'));
