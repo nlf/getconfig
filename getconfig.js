@@ -2,6 +2,7 @@ var fs = require('fs'),
     path = require('path'),
     env = process.env.NODE_ENV || 'dev',
     colors = require('colors'),
+    usingDefault = false,
     useColor = true,
     silent = false,
     color,
@@ -25,19 +26,25 @@ function c(str, color) {
 }
 
 // build a file path to the config
-configPath = (require.main ? path.dirname(require.main.filename) : ".") + '/' + env + '_config.json';
+configPath = (require.main ? path.dirname(require.main.filename) : ".") + '/';
 
 // try to read it
 try {
-    config = fs.readFileSync(configPath, 'utf-8');
+    config = fs.readFileSync(configPath + env + '_config.json', 'utf-8');
 } catch (e) {
-    console.error(c("No config file found for %s", 'red'), env);
-    console.error(c("We couldn't find anything at: %s", 'grey'), configPath);
-    throw e;
+    try {
+        config = fs.readFileSync(configPath + 'config.json', 'utf-8');
+        usingDefault = true;
+    } catch (e) {
+        console.error(c("No config file found for %s", 'red'), env);
+        console.error(c("We couldn't find anything at: %s", 'grey'), configPath);
+        throw e;
+    }
 }
 
 try {
     config = JSON.parse(config);
+    if (usingDefault) config = config[env];
     if (config.getconfig) {
         if (config.getconfig.hasOwnProperty('colors')) useColor = config.getconfig.colors;
         if (config.getconfig.hasOwnProperty('silent')) silent = config.getconfig.silent;        
