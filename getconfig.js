@@ -37,7 +37,8 @@ try {
         usingDefault = true;
     } catch (e) {
         console.error(c("No config file found for %s", 'red'), env);
-        console.error(c("We couldn't find anything at: %s", 'grey'), configPath);
+        console.error(c("We couldn't find anything at: %s", 'grey'), configPath + env + '_config.json');
+        console.error(c("Or at: %s", 'grey'), configPath + 'config.json');
         throw e;
     }
 }
